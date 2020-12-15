@@ -4,10 +4,10 @@
   "main": "frontend/javascript/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/username/bridgetown-media-optimization.git"
+    "url": "https://github.com/julianrubisch/bridgetown-media-optimization.git"
   },
-  "author": "Bridgetown Maintainers <maintainers@bridgetownrb.com>",
-  "homepage": "https://www.bridgetownrb.com",
+  "author": "Julian Rubisch <julian@julianrubisch.at>",
+  "homepage": "https://github.com/julianrubisch/bridgetown-media-optimization",
   "license": "MIT",
   "private": false,
   "files": [
