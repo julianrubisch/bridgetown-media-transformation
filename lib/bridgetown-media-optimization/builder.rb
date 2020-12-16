@@ -7,8 +7,11 @@ require "image_processing/vips"
 module BridgetownMediaOptimization
   class Builder < Bridgetown::Builder
     attr_reader :attributes
+    attr_reader :media_optimizations
 
     def build
+      @media_optimizations ||= {}
+
       liquid_tag "resp_picture", as_block: true do |attributes, tag|
         @attributes = attributes.split(",").map(&:strip)
         path = tag.context["src"]
@@ -20,14 +23,13 @@ module BridgetownMediaOptimization
           "webp" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]],
           "jpg" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]]
         }
-        site.data[:media_optimizations] ||= {}
-        site.data[:media_optimizations][path] = transformation_specs
+        @media_optimizations.merge!({path => transformation_specs})
         picture_tag(path: path, lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
       end
 
       hook :site, :post_write do |site|
         # kick off transformations
-        site.data[:media_optimizations].each do |path, spec|
+        media_optimizations.each do |path, spec|
           next if path.empty?
 
           pipeline = ImageProcessing::Vips.source(File.join(site.source, path))
