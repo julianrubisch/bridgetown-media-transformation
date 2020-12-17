@@ -1,8 +1,4 @@
-# Sample plugin for Bridgetown
-
-_NOTE: This isn't a real plugin! Copy this sample code and use it to create your own Ruby gem! [Help guide here…](https://www.bridgetownrb.com/docs/plugins)_ 😃
-
-_Starting with Bridgetown v0.15, you can run_ `bridgetown plugins new` _to easily set up a customized verison of this starter repo._
+# Bridgetown Media Transformation
 
 A Bridgetown plugin to [fill in the blank]…
 
@@ -11,8 +7,12 @@ A Bridgetown plugin to [fill in the blank]…
 Run this command to add this plugin to your site's Gemfile:
 
 ```shell
-$ bundle add my-awesome-plugin -g bridgetown_plugins
+$ bundle add bridgetown-media-transformation -g bridgetown_plugins
 ```
+
+### with VIPS
+
+### with ImageMagick
 
 ## Usage
 
@@ -20,8 +20,24 @@ The plugin will…
 
 ### Optional configuration options
 
-The plugin will automatically use any of the following metadata variables if they are present in your site's `_data/site_metadata.yml` file.
+```yaml
+# bridgetown.config.yml
 
+media_transformation:
+  # Whether to optimize transformed images with image_optim
+  #
+  # Type: Boolean
+  # Optional: true
+  # Default: false
+  optimize: true
+
+  # Whether to progressive scan JPGs
+  #
+  # Type: Boolean
+  # Optional: true
+  # Default: false
+  interlace: true
+```
 …
 
 ## Testing
@@ -38,18 +54,3 @@ The plugin will automatically use any of the following metadata variables if the
 5. Push to the branch (`git push origin my-new-feature`)
 6. Create a new Pull Request
 
-----
-
-## Releasing (you can delete this section in your own plugin repo)
-
-To release a new version of the plugin, simply bump up the version number in both `version.rb` and
-`package.json`, and then run `script/release`. This will require you to have a registered account
-with both the [RubyGems.org](https://rubygems.org) and [NPM](https://www.npmjs.com) registries.
-You can optionally remove the `package.json` and `frontend` folder if you don't need to package frontend
-assets for Webpack.
-
-If you run into any problems or need further guidance, please check out our [Bridgetown community resources](https://www.bridgetownrb.com/docs/community)
-where friendly folks are standing by to help you build and release your plugin or theme.
-
-**NOTE:** make sure you add the `bridgetown-plugin` [topic](https://github.com/topics/bridgetown-plugin) to your
-plugin's GitHub repo so the plugin or theme will show up on [Bridgetown's official Plugin Directory](https://www.bridgetownrb.com/plugins)! (There may be a day or so delay before you see it appear.)
