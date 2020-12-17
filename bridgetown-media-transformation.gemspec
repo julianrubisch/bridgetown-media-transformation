@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "bridgetown", ">= 0.15", "< 2.0"
   spec.add_dependency "image_processing", "~> 1.0"
+  spec.add_dependency "image_optim", "~> 0.27"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "nokogiri", "~> 1.6"

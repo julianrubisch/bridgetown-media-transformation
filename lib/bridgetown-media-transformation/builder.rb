@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require "pry"
 require "image_processing/mini_magick"
 require "image_processing/vips"
+require "image_optim"
 
 module BridgetownMediaTransformation
   class Builder < Bridgetown::Builder
@@ -13,12 +13,12 @@ module BridgetownMediaTransformation
       @media_transformations ||= {}
 
       Bridgetown.logger.info "[media-transformation] Interlacing JPEG: #{interlace?}"
+      Bridgetown.logger.info "[media-transformation] Optimizing: #{optimize?}"
 
       liquid_tag "resp_picture", as_block: true do |attributes, tag|
         @attributes = attributes.split(",").map(&:strip)
         path = tag.context["src"]
         path ||= @attributes.first
-        # transformation_specs = JSON.parse(attributes.split(",").map(&:strip).last)
         lazy = kargs.fetch("lazy") { false }
         transformation_specs = kargs.fetch("transformation_specs") {
           {
@@ -52,6 +52,12 @@ module BridgetownMediaTransformation
                 pipeline
                   .resize_to_limit(spec.first, spec.first)
                   .call(destination: destination)
+
+                if optimize? && Bridgetown.environment == "production"
+                  Bridgetown.logger.info "[media-transformation] Optimizing #{destination}"
+                  image_optim = ImageOptim.new
+                  image_optim.optimize_image!(destination)
+                end
               end
             end
           end
@@ -92,6 +98,10 @@ module BridgetownMediaTransformation
 
     def interlace?
       options.dig(:interlace) || false
+    end
+
+    def optimize?
+      options.dig(:optimize) || false
     end
 
     def options
