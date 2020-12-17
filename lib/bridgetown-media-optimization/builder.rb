@@ -12,6 +12,8 @@ module BridgetownMediaOptimization
     def build
       @media_optimizations ||= {}
 
+      Bridgetown.logger.info "[media-optimization] Interlacing JPEG: #{interlace?}"
+
       liquid_tag "resp_picture", as_block: true do |attributes, tag|
         @attributes = attributes.split(",").map(&:strip)
         path = tag.context["src"]
@@ -39,13 +41,13 @@ module BridgetownMediaOptimization
           spec.each do |format, specs|
             pipeline.convert(format) 
 
-            # pipeline.saver(interlace: true) if format == "jpg"
+            pipeline.saver(interlace: true) if format == "jpg" && interlace?
 
             specs.each do |spec|
               destination = File.join(site.config["destination"], "#{File.join(File.dirname(path), file_basename(path))}-#{spec.first}.#{format}")
 
               unless File.exist? destination
-                Bridgetown.logger.debug "Generating #{destination}"
+                Bridgetown.logger.info "[media-optimization] Generating #{destination}"
 
                 pipeline
                   .resize_to_limit(spec.first, spec.first)
@@ -86,6 +88,14 @@ module BridgetownMediaOptimization
 
     def file_basename(path)
       File.basename(File.join(site.source, path), ".*")
+    end
+
+    def interlace?
+      options.dig(:interlace) || false
+    end
+
+    def options
+      config["media_optimization"] || {}
     end
   end
 end
