@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "bridgetown"
-require File.expand_path("../lib/bridgetown-media-optimization", __dir__)
+require File.expand_path("../lib/bridgetown-media-transformation", __dir__)
 
 Bridgetown.logger.log_level = :error
 

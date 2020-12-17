@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
-require_relative "lib/bridgetown-media-optimization/version"
+require_relative "lib/bridgetown-media-transformation/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "bridgetown-media-optimization"
-  spec.version       = BridgetownMediaOptimization::VERSION
+  spec.name          = "bridgetown-media-transformation"
+  spec.version       = BridgetownMediaTransformation::VERSION
   spec.author        = "Julian Rubisch"
   spec.email         = "julian@julianrubisch.at"
-  spec.summary       = "Image and video optimization via sharp and ffmpeg"
-  spec.homepage      = "https://github.com/julianrubisch/bridgetown-media-optimization"
+  spec.summary       = "Image and video transformation via image_processing and ffmpeg"
+  spec.homepage      = "https://github.com/julianrubisch/bridgetown-media-transformation"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r!^(test|script|spec|features|frontend)/!) }
   spec.test_files    = spec.files.grep(%r!^spec/!)
   spec.require_paths = ["lib"]
-  spec.metadata      = { "yarn-add" => "bridgetown-media-optimization@#{BridgetownMediaOptimization::VERSION}" }
+  spec.metadata      = { "yarn-add" => "bridgetown-media-transformation@#{BridgetownMediaTransformation::VERSION}" }
 
   spec.required_ruby_version = ">= 2.5.0"
 

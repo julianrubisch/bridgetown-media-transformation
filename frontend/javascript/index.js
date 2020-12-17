@@ -1,8 +1,8 @@
 /* Use in your app by simply adding to your app's index.js:
 
-import BridgetownMediaOptimization from "bridgetown-media-optimization"
+import BridgetownMediaTransformation from "bridgetown-media-transformation"
 
-BridgetownMediaOptimization()
+BridgetownMediaTransformation()
 */
 
 export default function() {

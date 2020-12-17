@@ -4,15 +4,15 @@ require "pry"
 require "image_processing/mini_magick"
 require "image_processing/vips"
 
-module BridgetownMediaOptimization
+module BridgetownMediaTransformation
   class Builder < Bridgetown::Builder
     attr_reader :attributes
-    attr_reader :media_optimizations
+    attr_reader :media_transformations
 
     def build
-      @media_optimizations ||= {}
+      @media_transformations ||= {}
 
-      Bridgetown.logger.info "[media-optimization] Interlacing JPEG: #{interlace?}"
+      Bridgetown.logger.info "[media-transformation] Interlacing JPEG: #{interlace?}"
 
       liquid_tag "resp_picture", as_block: true do |attributes, tag|
         @attributes = attributes.split(",").map(&:strip)
@@ -27,13 +27,13 @@ module BridgetownMediaOptimization
             "jpg" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]]
           }
         }
-        @media_optimizations.merge!({path => transformation_specs})
+        @media_transformations.merge!({path => transformation_specs})
         picture_tag(path: path, lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
       end
 
       hook :site, :post_write do |site|
         # kick off transformations
-        media_optimizations.each do |path, spec|
+        media_transformations.each do |path, spec|
           next if path.empty?
 
           pipeline = ImageProcessing::Vips.source(File.join(site.source, path))
@@ -47,7 +47,7 @@ module BridgetownMediaOptimization
               destination = File.join(site.config["destination"], "#{File.join(File.dirname(path), file_basename(path))}-#{spec.first}.#{format}")
 
               unless File.exist? destination
-                Bridgetown.logger.info "[media-optimization] Generating #{destination}"
+                Bridgetown.logger.info "[media-transformation] Generating #{destination}"
 
                 pipeline
                   .resize_to_limit(spec.first, spec.first)
@@ -95,9 +95,9 @@ module BridgetownMediaOptimization
     end
 
     def options
-      config["media_optimization"] || {}
+      config["media_transformation"] || {}
     end
   end
 end
 
-BridgetownMediaOptimization::Builder.register
+BridgetownMediaTransformation::Builder.register

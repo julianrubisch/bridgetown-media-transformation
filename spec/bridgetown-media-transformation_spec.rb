@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe(BridgetownMediaOptimization) do
+describe(BridgetownMediaTransformation) do
   let(:overrides) { {} }
   let(:config) do
     Bridgetown.configuration(Bridgetown::Utils.deep_merge_hashes({
