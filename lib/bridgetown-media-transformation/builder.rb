@@ -51,7 +51,7 @@ module BridgetownMediaTransformation
                   Bridgetown.logger.info "[media-transformation] Generating #{destination}"
 
                   pipeline
-                    .resize_to_limit(spec.first, spec.first)
+                    .resize_to_fit(spec.first, nil)
                     .call(destination: destination)
 
                   if optimize? && Bridgetown.environment == "production"
