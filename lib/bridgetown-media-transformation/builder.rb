@@ -73,7 +73,7 @@ module BridgetownMediaTransformation
           scaled_width, srcset_descriptor = s
           "#{File.join(File.dirname(path), file_basename(path))}-#{scaled_width}.#{format} #{srcset_descriptor}"
         end.join(", ")
-        "<source #{lazy ? 'data-' : ''}srcset=\"#{srcset}\" type=\"image/#{format}\"></source>"
+        "<source #{lazy ? 'data-' : ''}srcset=\"#{srcset}\" type=\"image/#{format}\" />"
       end
 
       tag = <<~PICTURE

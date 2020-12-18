@@ -31,7 +31,7 @@ describe(BridgetownMediaTransformation) do
   end
 
   it "outputs a srcset with default transformations" do
-    expect(contents).to match '<source srcset="/assets/img/sample_image-640.webp 640w, /assets/img/sample_image-1024.webp 1024w, /assets/img/sample_image-1280.webp 1280w, /assets/img/sample_image-1920.webp 1920w, /assets/img/sample_image-3840.webp 2x" type="image/webp"></source>'
-    expect(contents).to match '<source srcset="/assets/img/sample_image-640.jpg 640w, /assets/img/sample_image-1024.jpg 1024w, /assets/img/sample_image-1280.jpg 1280w, /assets/img/sample_image-1920.jpg 1920w, /assets/img/sample_image-3840.jpg 2x" type="image/jpg"></source>'
+    expect(contents).to match '<source srcset="/assets/img/sample_image-640.webp 640w, /assets/img/sample_image-1024.webp 1024w, /assets/img/sample_image-1280.webp 1280w, /assets/img/sample_image-1920.webp 1920w, /assets/img/sample_image-3840.webp 2x" type="image/webp" />'
+    expect(contents).to match '<source srcset="/assets/img/sample_image-640.jpg 640w, /assets/img/sample_image-1024.jpg 1024w, /assets/img/sample_image-1280.jpg 1280w, /assets/img/sample_image-1920.jpg 1920w, /assets/img/sample_image-3840.jpg 2x" type="image/jpg" />'
   end
 end
