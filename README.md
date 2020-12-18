@@ -42,8 +42,8 @@ media_transformation:
 
 ## Testing
 
-* Run `bundle exec rspec` to run the test suite
-* Or run `script/cibuild` to validate with Rubocop and test with rspec together.
+* Run `BRIDGETOWN_ENV=test script/test` to run the test suite
+* Or run `BRIDGETOWN_ENV=test script/cibuild` to validate with Rubocop and test with rspec together.
 
 ## Contributing
 

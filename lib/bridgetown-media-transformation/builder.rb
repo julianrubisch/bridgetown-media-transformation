@@ -31,32 +31,34 @@ module BridgetownMediaTransformation
         picture_tag(path: path, lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
       end
 
-      hook :site, :post_write do |site|
-        # kick off transformations
-        media_transformations.each do |path, spec|
-          next if path.empty?
+      unless Bridgetown.environment == "test"
+        hook :site, :post_write do |site|
+          # kick off transformations
+          media_transformations.each do |path, spec|
+            next if path.empty?
 
-          pipeline = ImageProcessing::Vips.source(File.join(site.source, path))
+            pipeline = ImageProcessing::Vips.source(File.join(site.source, path))
 
-          spec.each do |format, specs|
-            pipeline.convert(format) 
+            spec.each do |format, specs|
+              pipeline.convert(format) 
 
-            pipeline.saver(interlace: true) if format == "jpg" && interlace?
+              pipeline.saver(interlace: true) if format == "jpg" && interlace?
 
-            specs.each do |spec|
-              destination = File.join(site.config["destination"], "#{File.join(File.dirname(path), file_basename(path))}-#{spec.first}.#{format}")
+              specs.each do |spec|
+                destination = File.join(site.config["destination"], "#{File.join(File.dirname(path), file_basename(path))}-#{spec.first}.#{format}")
 
-              unless File.exist? destination
-                Bridgetown.logger.info "[media-transformation] Generating #{destination}"
+                unless File.exist? destination
+                  Bridgetown.logger.info "[media-transformation] Generating #{destination}"
 
-                pipeline
-                  .resize_to_limit(spec.first, spec.first)
-                  .call(destination: destination)
+                  pipeline
+                    .resize_to_limit(spec.first, spec.first)
+                    .call(destination: destination)
 
-                if optimize? && Bridgetown.environment == "production"
-                  Bridgetown.logger.info "[media-transformation] Optimizing #{destination}"
-                  image_optim = ImageOptim.new
-                  image_optim.optimize_image!(destination)
+                  if optimize? && Bridgetown.environment == "production"
+                    Bridgetown.logger.info "[media-transformation] Optimizing #{destination}"
+                    image_optim = ImageOptim.new
+                    image_optim.optimize_image!(destination)
+                  end
                 end
               end
             end

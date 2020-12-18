@@ -22,7 +22,7 @@ describe(BridgetownMediaTransformation) do
     }
   end
   let(:site) { Bridgetown::Site.new(config) }
-  let(:contents) { File.read(dest_dir("index.html")) }
+  let(:contents) { File.read(dest_dir("with_component.html")) }
   before(:each) do
     metadata = metadata_defaults.merge(metadata_overrides).to_yaml.sub("---\n", "")
     File.write(source_dir("_data/site_metadata.yml"), metadata)
