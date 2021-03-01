@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "bridgetown"
+require "bridgetown-media-transformation/media_transformation"
 require "bridgetown-media-transformation/builder"
 
 Bridgetown::PluginManager.new_source_manifest(

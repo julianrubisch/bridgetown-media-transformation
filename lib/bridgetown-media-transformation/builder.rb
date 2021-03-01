@@ -11,7 +11,7 @@ module BridgetownMediaTransformation
     attr_reader :media_transformations
 
     def build
-      @media_transformations ||= {}
+      @media_transformations ||= []
 
       Bridgetown.logger.info "[media-transformation] Interlacing JPEG: #{interlace?}"
       Bridgetown.logger.info "[media-transformation] Optimizing: #{optimize?}"
@@ -30,10 +30,8 @@ module BridgetownMediaTransformation
             "jpg" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]]
           }
         }
-        @media_transformations.merge!({dest => {
-                                         transformation_specs: transformation_specs,
-                                         src: src
-                                       }})
+
+        @media_transformations << MediaTransformation.new(dest: dest, src: src, specs: transformation_specs, optimize: optimize?, interlace: interlace?)
 
         picture_tag(src: "#{Bridgetown.environment == 'development' ? '_bridgetown/' : '' }#{File.join(File.dirname(dest), file_basename(src))}", lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
       end
@@ -41,38 +39,7 @@ module BridgetownMediaTransformation
       unless Bridgetown.environment == "test"
         hook :site, :post_write do |site|
           # kick off transformations
-          media_transformations.each do |dest, spec|
-            src = spec.fetch(:src)
-            next if src.empty?
-
-            pipeline = ImageProcessing::Vips.source(File.join(site.source, src))
-
-            spec[:transformation_specs].each do |format, specs|
-              pipeline.convert(format) 
-
-              pipeline.saver(interlace: true) if format == "jpg" && interlace?
-
-              specs.each do |spec|
-                destination = File.join(site.config["destination"], "#{Bridgetown.environment == 'development' ? '_bridgetown/' : ''}", "#{File.join(File.dirname(dest), file_basename(src))}-#{spec.first}.#{format}")
-
-                FileUtils.mkdir_p(File.dirname(destination)) if Bridgetown.environment == "development"
-
-                unless File.exist? destination
-                  Bridgetown.logger.info "[media-transformation] Generating #{destination}"
-
-                  pipeline
-                    .resize_to_fit(spec.first, nil)
-                    .call(destination: destination)
-
-                  if optimize? && Bridgetown.environment == "production"
-                    Bridgetown.logger.info "[media-transformation] Optimizing #{destination}"
-                    image_optim = ImageOptim.new
-                    image_optim.optimize_image!(destination)
-                  end
-                end
-              end
-            end
-          end
+          media_transformations.each { |transformation| transformation.process(site: site) }
         end
       end
     end
