@@ -3,6 +3,7 @@
 require "image_processing/mini_magick"
 require "image_processing/vips"
 require "image_optim"
+require "fileutils"
 
 module BridgetownMediaTransformation
   class Builder < Bridgetown::Builder
@@ -28,7 +29,8 @@ module BridgetownMediaTransformation
           }
         }
         @media_transformations.merge!({path => transformation_specs})
-        picture_tag(path: path, lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
+
+        picture_tag(path: "#{Bridgetown.environment == 'development' ? '_bridgetown/' : '' }#{path}", lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
       end
 
       unless Bridgetown.environment == "test"
@@ -45,7 +47,9 @@ module BridgetownMediaTransformation
               pipeline.saver(interlace: true) if format == "jpg" && interlace?
 
               specs.each do |spec|
-                destination = File.join(site.config["destination"], "#{File.join(File.dirname(path), file_basename(path))}-#{spec.first}.#{format}")
+                destination = File.join(site.config["destination"], "#{Bridgetown.environment == 'development' ? '_bridgetown/' : ''}", "#{File.join(File.dirname(path), file_basename(path))}-#{spec.first}.#{format}")
+
+                FileUtils.mkdir_p(File.dirname(destination)) if Bridgetown.environment == "development"
 
                 unless File.exist? destination
                   Bridgetown.logger.info "[media-transformation] Generating #{destination}"
