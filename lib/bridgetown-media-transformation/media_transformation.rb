@@ -26,7 +26,7 @@ class MediaTransformation
       specs.each do |spec|
         destination = File.join(site.config["destination"], "#{Bridgetown.environment == 'development' ? '_bridgetown/' : ''}", "#{File.join(File.dirname(dest), file_basename(src, site))}-#{spec.first}.#{format}")
 
-        FileUtils.mkdir_p(File.dirname(destination)) if Bridgetown.environment == "development"
+        FileUtils.mkdir_p(File.dirname(destination))
 
         unless File.exist? destination
           Bridgetown.logger.info "[media-transformation] Generating #{destination}"
