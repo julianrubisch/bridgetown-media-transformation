@@ -18,8 +18,10 @@ module BridgetownMediaTransformation
 
       liquid_tag "resp_picture", as_block: true do |attributes, tag|
         @attributes = attributes.split(",").map(&:strip)
-        path = tag.context["src"]
-        path ||= @attributes.first
+        src = tag.context["src"]
+        dest = tag.context["dest"]
+        src ||= @attributes.first
+        dest ||= src
         lazy = kargs.fetch("lazy") { false }
         transformation_specs = kargs.fetch("transformation_specs") {
           {
@@ -28,26 +30,30 @@ module BridgetownMediaTransformation
             "jpg" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]]
           }
         }
-        @media_transformations.merge!({path => transformation_specs})
+        @media_transformations.merge!({dest => {
+                                         transformation_specs: transformation_specs,
+                                         src: src
+                                       }})
 
-        picture_tag(path: "#{Bridgetown.environment == 'development' ? '_bridgetown/' : '' }#{path}", lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
+        picture_tag(src: "#{Bridgetown.environment == 'development' ? '_bridgetown/' : '' }#{File.join(File.dirname(dest), file_basename(src))}", lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
       end
 
       unless Bridgetown.environment == "test"
         hook :site, :post_write do |site|
           # kick off transformations
-          media_transformations.each do |path, spec|
-            next if path.empty?
+          media_transformations.each do |dest, spec|
+            src = spec.fetch(:src)
+            next if src.empty?
 
-            pipeline = ImageProcessing::Vips.source(File.join(site.source, path))
+            pipeline = ImageProcessing::Vips.source(File.join(site.source, src))
 
-            spec.each do |format, specs|
+            spec[:transformation_specs].each do |format, specs|
               pipeline.convert(format) 
 
               pipeline.saver(interlace: true) if format == "jpg" && interlace?
 
               specs.each do |spec|
-                destination = File.join(site.config["destination"], "#{Bridgetown.environment == 'development' ? '_bridgetown/' : ''}", "#{File.join(File.dirname(path), file_basename(path))}-#{spec.first}.#{format}")
+                destination = File.join(site.config["destination"], "#{Bridgetown.environment == 'development' ? '_bridgetown/' : ''}", "#{File.join(File.dirname(dest), file_basename(src))}-#{spec.first}.#{format}")
 
                 FileUtils.mkdir_p(File.dirname(destination)) if Bridgetown.environment == "development"
 
@@ -71,11 +77,11 @@ module BridgetownMediaTransformation
       end
     end
 
-    def picture_tag(path: "", lazy: false, attributes:, transformation_specs:)
+    def picture_tag(src: "", lazy: false, attributes:, transformation_specs:)
       source_elements = transformation_specs.map do |format, spec|
         srcset = spec.map do |s|
           scaled_width, srcset_descriptor = s
-          "#{File.join(File.dirname(path), file_basename(path))}-#{scaled_width}.#{format} #{srcset_descriptor}"
+          "#{File.join(File.dirname(src), file_basename(src))}-#{scaled_width}.#{format} #{srcset_descriptor}"
         end.join(", ")
         "<source #{lazy ? 'data-' : ''}srcset=\"#{srcset}\" type=\"image/#{format}\" />"
       end
@@ -83,7 +89,7 @@ module BridgetownMediaTransformation
       tag = <<~PICTURE
         <picture>
           #{source_elements.join("\n")}
-          <img #{lazy ? 'data-' : ''}src="#{path}" #{attributes}>
+          <img #{lazy ? 'data-' : ''}src="#{src}" #{attributes}>
         </picture>
       PICTURE
       tag
