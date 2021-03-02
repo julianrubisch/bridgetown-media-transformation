@@ -1,3 +1,5 @@
+require "fileutils"
+
 class MediaTransformation
   attr_reader :dest, :src, :specs, :optimize, :interlace
 
