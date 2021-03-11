@@ -1,21 +1,26 @@
 require "fileutils"
 
 class MediaTransformation
-  attr_reader :dest, :src, :specs, :optimize, :interlace
+  attr_reader :dest, :src, :specs, :optimize, :interlace, :site
 
-  def initialize(dest:, src:, specs:, optimize:, interlace:)
+  def initialize(dest:, src:, specs:, optimize:, interlace:, site:)
     @dest = dest
     @src = src
     @specs = specs
     @optimize = optimize
     @interlace = interlace
+    @site = site
   end
 
-  def file_basename(path, site)
+  def file_basename(path)
     File.basename(File.join(site.source, path), ".*")
   end
 
-  def process(site:)
+  def file_hash
+    Digest::MD5.file(File.join(site.source, src)).hexdigest
+  end
+
+  def process
     return if src.empty?
 
     pipeline = ImageProcessing::Vips.source(File.join(site.source, src))
@@ -26,23 +31,29 @@ class MediaTransformation
       pipeline.saver(interlace: true) if format == "jpg" && interlace
 
       specs.each do |spec|
-        destination = File.join(site.config["destination"], "#{Bridgetown.environment == 'development' ? '_bridgetown/' : ''}", "#{File.join(File.dirname(dest), file_basename(src, site))}-#{spec.first}.#{format}")
+        destination_filename = "#{file_hash}-#{file_basename(src)}"
+        cache_destination = File.join(site.source, "..", ".bmt-cache", "#{File.join(File.dirname(dest), destination_filename)}-#{spec.first}.#{format}")
+        destination = File.join(site.config["destination"], "#{File.join(File.dirname(dest), destination_filename)}-#{spec.first}.#{format}")
 
-        FileUtils.mkdir_p(File.dirname(destination))
+        FileUtils.mkdir_p(File.dirname(cache_destination))
 
-        unless File.exist? destination
-          Bridgetown.logger.info "[media-transformation] Generating #{destination}"
+        unless File.exist? cache_destination
+          Bridgetown.logger.info "[media-transformation] Generating #{cache_destination}"
 
           pipeline
             .resize_to_fit(spec.first, nil)
-            .call(destination: destination)
+            .call(destination: cache_destination)
 
           if optimize && Bridgetown.environment == "production"
-            Bridgetown.logger.info "[media-transformation] Optimizing #{destination}"
+            Bridgetown.logger.info "[media-transformation] Optimizing #{cache_destination}"
             image_optim = ImageOptim.new
-            image_optim.optimize_image!(destination)
+            image_optim.optimize_image!(cache_destination)
           end
         end
+
+        Bridgetown.logger.info "[media-transformation] Copying #{cache_destination} to #{destination}"
+        FileUtils.mkdir_p(File.dirname(destination))
+        FileUtils.cp(cache_destination, destination) 
       end
     end
   end

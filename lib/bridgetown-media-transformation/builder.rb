@@ -31,15 +31,18 @@ module BridgetownMediaTransformation
           }
         }
 
-        @media_transformations << MediaTransformation.new(dest: dest, src: src, specs: transformation_specs, optimize: optimize?, interlace: interlace?)
+        transformation = MediaTransformation.new(dest: dest, src: src, specs: transformation_specs, optimize: optimize?, interlace: interlace?, site: site)
+        @media_transformations << transformation
 
-        picture_tag(src: "#{Bridgetown.environment == 'development' ? '_bridgetown/' : '' }#{File.join(File.dirname(dest), file_basename(src))}", lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
+        src_filename = "#{transformation.file_hash}-#{file_basename(src)}"
+
+        picture_tag(src: "#{File.join(File.dirname(dest), src_filename)}", lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
       end
 
       unless Bridgetown.environment == "test"
         hook :site, :post_write do |site|
           # kick off transformations
-          media_transformations.each { |transformation| transformation.process(site: site) }
+          media_transformations.each { |transformation| transformation.process }
         end
       end
     end
