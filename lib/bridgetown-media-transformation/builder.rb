@@ -7,8 +7,7 @@ require "fileutils"
 
 module BridgetownMediaTransformation
   class Builder < Bridgetown::Builder
-    attr_reader :attributes
-    attr_reader :media_transformations
+    attr_reader :attributes, :media_transformations
 
     def build
       @media_transformations ||= []
@@ -31,12 +30,10 @@ module BridgetownMediaTransformation
           }
         }
 
-        transformation = MediaTransformation.new(dest: dest, src: src, specs: transformation_specs, optimize: optimize?, interlace: interlace?, site: site)
+        transformation = MediaTransformation.new(dest: dest, src: src, specs: transformation_specs, optimize: optimize?, interlace: interlace?, site: site, builder: self)
         @media_transformations << transformation
 
-        src_filename = "#{transformation.file_hash}-#{file_basename(src)}"
-
-        picture_tag(src: "#{File.join(File.dirname(dest), src_filename)}", lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
+        picture_tag(src: src, dest: dest, file_hash: transformation.file_hash, lazy: lazy, attributes: tag.content, transformation_specs: transformation_specs)
       end
 
       unless Bridgetown.environment == "test"
@@ -47,11 +44,14 @@ module BridgetownMediaTransformation
       end
     end
 
-    def picture_tag(src: "", lazy: false, attributes:, transformation_specs:)
+    def picture_tag(src: "", dest: "", file_hash:, lazy: false, attributes:, transformation_specs:)
+      src_filename = "#{file_hash}-#{file_basename(src)}"
+      prefixed_src = "#{File.join(File.dirname(dest), src_filename)}"
+
       source_elements = transformation_specs.map do |format, spec|
         srcset = spec.map do |s|
           scaled_width, srcset_descriptor = s
-          "#{File.join(File.dirname(src), file_basename(src))}-#{scaled_width}.#{format} #{srcset_descriptor}"
+          "#{File.join(File.dirname(dest), file_basename(prefixed_src))}-#{scaled_width}.#{format} #{srcset_descriptor}"
         end.join(", ")
         "<source #{lazy ? 'data-' : ''}srcset=\"#{srcset}\" type=\"image/#{format}\" />"
       end
