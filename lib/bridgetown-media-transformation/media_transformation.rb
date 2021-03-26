@@ -3,13 +3,14 @@ require "fileutils"
 class MediaTransformation
   attr_reader :dest, :src, :specs, :optimize, :interlace, :site
 
-  def initialize(dest:, src:, specs:, optimize:, interlace:, site:)
+  def initialize(dest:, src:, specs:, optimize:, interlace:, site:, builder:)
     @dest = dest
     @src = src
     @specs = specs
     @optimize = optimize
     @interlace = interlace
     @site = site
+    @builder = builder
   end
 
   def file_basename(path)
@@ -38,20 +39,20 @@ class MediaTransformation
         FileUtils.mkdir_p(File.dirname(cache_destination))
 
         unless File.exist? cache_destination
-          Bridgetown.logger.info "[media-transformation] Generating #{cache_destination}"
+          Bridgetown.logger.info "[media-transformation] Generating #{cache_destination}" if @builder.verbose?
 
           pipeline
             .resize_to_fit(spec.first, nil)
             .call(destination: cache_destination)
 
           if optimize && Bridgetown.environment == "production"
-            Bridgetown.logger.info "[media-transformation] Optimizing #{cache_destination}"
+            Bridgetown.logger.info "[media-transformation] Optimizing #{cache_destination}" if @builder.verbose?
             image_optim = ImageOptim.new
             image_optim.optimize_image!(cache_destination)
           end
         end
 
-        Bridgetown.logger.info "[media-transformation] Copying #{cache_destination} to #{destination}"
+        Bridgetown.logger.info "[media-transformation] Copying #{cache_destination} to #{destination}" if @builder.verbose?
         FileUtils.mkdir_p(File.dirname(destination))
         FileUtils.cp(cache_destination, destination) 
       end

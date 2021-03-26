@@ -64,6 +64,10 @@ module BridgetownMediaTransformation
       PICTURE
       tag
     end
+
+    def verbose?
+      options.dig(:verbose) || Bridgetown.environment == "production"
+    end
     
     private
 
