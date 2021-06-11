@@ -7,6 +7,11 @@ require "fileutils"
 
 module BridgetownMediaTransformation
   class Builder < Bridgetown::Builder
+    DEFAULT_TRANSFORMATION_SPECS = {
+      "webp" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]],
+      "jpg" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]]
+    }
+
     attr_reader :attributes, :media_transformations
 
     def build
@@ -22,13 +27,7 @@ module BridgetownMediaTransformation
         src ||= @attributes.first
         dest ||= src
         lazy = kargs.fetch("lazy") { false }
-        transformation_specs = kargs.fetch("transformation_specs") {
-          {
-            # scaled width, srcset_descriptor
-            "webp" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]],
-            "jpg" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]]
-          }
-        }
+        transformation_specs = kargs.fetch("transformation_specs") { default_transformation_specs }
 
         transformation = MediaTransformation.new(dest: dest, src: src, specs: transformation_specs, optimize: optimize?, interlace: interlace?, site: site, builder: self)
         @media_transformations << transformation
@@ -92,6 +91,10 @@ module BridgetownMediaTransformation
 
     def options
       config["media_transformation"] || {}
+    end
+
+    def default_transformation_specs
+      options.fetch(:default_transformations) { DEFAULT_TRANSFORMATION_SPECS }
     end
   end
 end

@@ -1,1 +1,33 @@
 timezone: UTC
+
+media_transformation:
+  default_transformations:
+    webp:
+      -
+        - 1024
+        - 1024w
+      -
+        - 1280
+        - 1280w
+      -
+        - 1920
+        - 1920w
+      -
+        - 3840
+        - 2x
+    jpg:
+      -
+        - 640
+        - 640w
+      -
+        - 1024
+        - 1024w
+      -
+        - 1280
+        - 1280w
+      -
+        - 1920
+        - 1920w
+      -
+        - 3840
+        - 2x
