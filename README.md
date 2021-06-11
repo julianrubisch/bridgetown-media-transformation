@@ -37,6 +37,31 @@ media_transformation:
   # Optional: true
   # Default: false
   interlace: true
+
+  # The default transformations
+  #
+  # Type: Hash
+  # Optional: true
+  # Default:
+  #   {
+  #     "webp" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]],
+  #     "jpg" => [[640, "640w"], [1024, "1024w"], [1280, "1280w"], [1920, "1920w"], [3840, "2x"]]
+  #   }
+  default_transformations:
+    webp:
+      -
+        - 320
+        - 320w
+      -
+        - 2000
+        - 2000w
+    jpg:
+      -
+        - 320
+        - 320w
+      -
+        - 2000
+        - 2000w
 ```
 …
 
