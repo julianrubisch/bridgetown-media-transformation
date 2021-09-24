@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "fileutils"
 
 class MediaTransformation
@@ -27,7 +29,7 @@ class MediaTransformation
     pipeline = ImageProcessing::Vips.source(File.join(site.source, src))
 
     specs.each do |format, specs|
-      pipeline.convert(format) 
+      pipeline.convert(format)
 
       pipeline.saver(interlace: true) if format == "jpg" && interlace
 
@@ -39,22 +41,28 @@ class MediaTransformation
         FileUtils.mkdir_p(File.dirname(cache_destination))
 
         unless File.exist? cache_destination
-          Bridgetown.logger.info "[media-transformation] Generating #{cache_destination}" if @builder.verbose?
+          if @builder.verbose?
+            Bridgetown.logger.info "[media-transformation] Generating #{cache_destination}"
+          end
 
           pipeline
             .resize_to_fit(spec.first, nil)
             .call(destination: cache_destination)
 
           if optimize && Bridgetown.environment == "production"
-            Bridgetown.logger.info "[media-transformation] Optimizing #{cache_destination}" if @builder.verbose?
+            if @builder.verbose?
+              Bridgetown.logger.info "[media-transformation] Optimizing #{cache_destination}"
+            end
             image_optim = ImageOptim.new
             image_optim.optimize_image!(cache_destination)
           end
         end
 
-        Bridgetown.logger.info "[media-transformation] Copying #{cache_destination} to #{destination}" if @builder.verbose?
+        if @builder.verbose?
+          Bridgetown.logger.info "[media-transformation] Copying #{cache_destination} to #{destination}"
+        end
         FileUtils.mkdir_p(File.dirname(destination))
-        FileUtils.cp(cache_destination, destination) 
+        FileUtils.cp(cache_destination, destination)
       end
     end
   end
